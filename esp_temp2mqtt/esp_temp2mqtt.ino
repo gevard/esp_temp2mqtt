@@ -1,5 +1,5 @@
- //source code from http://www.esp8266learning.com/wemos-mini-ds18b20-temperature-sensor-example.php
- 
+//source code from http://www.esp8266learning.com/wemos-mini-ds18b20-temperature-sensor-example.php
+
 // OneWire DS18S20, DS18B20, DS1822 Temperature Example
 #include <OneWire.h>
 
@@ -44,24 +44,24 @@ int startup = 1;
 // Set ADC to read internal VCC
 ADC_MODE(ADC_VCC); //vcc read
 
-void setup() { 
+void setup() {
   // ITurn Off the LED
-  pinMode(BUILTIN_LED, OUTPUT);     
-  digitalWrite(BUILTIN_LED, HIGH); 
-  
+  pinMode(BUILTIN_LED, OUTPUT);
+  digitalWrite(BUILTIN_LED, HIGH);
+
   // Set power supply of the DS18B20
   pinMode(PinVCC, OUTPUT);
   pinMode(PinGND, OUTPUT);
   digitalWrite(PinVCC, HIGH);
-  digitalWrite(PinGND, LOW); 
+  digitalWrite(PinGND, LOW);
 
-  
+
 
   Serial.begin(9600);;
   delay(10);
-  
+
   // from m1tt_esp8266 exemple (File-->Exemple)
-  
+
 
 
 if (startup) {
@@ -76,9 +76,9 @@ if (startup) {
   byte data[12];
   byte addr[8];
   float celsius, fahrenheit;
-  
+
   if (startup) {
-    if ( !ds.search(addr)) 
+    if ( !ds.search(addr))
     {
       ds.reset_search();
       delay(250);
@@ -86,15 +86,15 @@ if (startup) {
 
     }
 
- 
-    if (OneWire::crc8(addr, 7) != addr[7]) 
+
+    if (OneWire::crc8(addr, 7) != addr[7])
     {
       Serial.println("CRC is not valid!");
       return;
     }
- 
+
     // the first ROM byte indicates which chip
-    switch (addr[0]) 
+    switch (addr[0])
     {
       case 0x10:
         type_s = 1;
@@ -108,40 +108,40 @@ if (startup) {
       default:
         Serial.println("Device is not a DS18x20 family device.");
       return;
-     } 
+     }
 
    startup = 0;
    }
-  
+
   ds.reset();
   ds.select(addr);
-  ds.write(0x44, 1);        // start conversion, with parasite power on at the end  
+  ds.write(0x44, 1);        // start conversion, with parasite power on at the end
   delay(1000);
   present = ds.reset();
-  ds.select(addr);    
+  ds.select(addr);
   ds.write(0xBE);         // Read Scratchpad
- 
-  for ( i = 0; i < 9; i++) 
-  {           
+
+  for ( i = 0; i < 9; i++)
+  {
     data[i] = ds.read();
   }
- 
+
   // Convert the data to actual temperature
   int16_t raw = (data[1] << 8) | data[0];
   if (type_s) {
     raw = raw << 3; // 9 bit resolution default
-    if (data[7] == 0x10) 
+    if (data[7] == 0x10)
     {
       raw = (raw & 0xFFF0) + 12 - data[6];
     }
-  } 
-  else 
+  }
+  else
   {
     byte cfg = (data[4] & 0x60);
     if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
     else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
- 
+
   }
   celsius = (float)raw / 16.0;
   fahrenheit = celsius * 1.8 + 32.0;
@@ -162,7 +162,7 @@ if (startup) {
   Serial.print(" = ");
   Serial.println(msg);
   client.publish(temp_topic, msg);
-  
+
   snprintf (msg, 75, "%f", vdd);
   Serial.print("Publish VDD value to :");
   Serial.print(mqtt_server);
@@ -171,7 +171,7 @@ if (startup) {
   Serial.print(" = ");
   Serial.println(msg);
   client.publish(vdd_topic, msg);
-  
+
   // wait for the MQTT message to be send
   delay(1000);
 
@@ -180,7 +180,7 @@ if (startup) {
   Serial.println(" minutes");
   //Time in uS
   ESP.deepSleep(sleepTimeM * 60 * 1000000);
-  
+
 }
 
 // from https://github.com/esp8266/Arduino/issues/1958
@@ -211,7 +211,7 @@ void setup_wifi() {
   Serial.print("WiFi connected, ");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  
+
 }
 
 // from m1tt_esp8266 exemple (File-->Exemple)
@@ -260,4 +260,3 @@ void reconnect() {
 void loop() {
 
 }
-
