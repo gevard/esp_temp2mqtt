@@ -16,9 +16,12 @@ OneWire  ds(4);  // on pin D2 (a 4.7K resistor is necessary)
 
 // Update these with values suitable for your network.
 // Connect to the WiFi
-const char* ssid = "....";
+const char* ssid = ".....";
 const char* password = ".....";
 const char* mqtt_server = "192.168.1.110";
+IPAddress ip( 192, 168, 1, 120 );
+IPAddress gateway( 192, 168, 1, 1 );
+IPAddress subnet( 255, 255, 255, 0 );
 
 // MQTT topics
 // Temperature measure
@@ -84,31 +87,31 @@ if (startup) {
     }
 
  
-  if (OneWire::crc8(addr, 7) != addr[7]) 
-  {
+    if (OneWire::crc8(addr, 7) != addr[7]) 
+    {
       Serial.println("CRC is not valid!");
       return;
-  }
+    }
  
-  // the first ROM byte indicates which chip
-  switch (addr[0]) 
-  {
-    case 0x10:
-      type_s = 1;
-      break;
-    case 0x28:
-      type_s = 0;
-      break;
-    case 0x22:
-      type_s = 0;
-      break;
-    default:
-      Serial.println("Device is not a DS18x20 family device.");
+    // the first ROM byte indicates which chip
+    switch (addr[0]) 
+    {
+      case 0x10:
+        type_s = 1;
+        break;
+      case 0x28:
+        type_s = 0;
+        break;
+      case 0x22:
+        type_s = 0;
+        break;
+      default:
+        Serial.println("Device is not a DS18x20 family device.");
       return;
-  } 
+     } 
 
    startup = 0;
-  }
+   }
   
   ds.reset();
   ds.select(addr);
@@ -183,7 +186,7 @@ if (startup) {
 // from https://github.com/esp8266/Arduino/issues/1958
 void setup_wifi() {
 
-  delay(10);
+  /*delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
@@ -195,6 +198,14 @@ void setup_wifi() {
     delay(500);
     Serial.print(".");
   }
+  */
+
+  WiFi.forceSleepWake();
+  delay( 1 );
+  WiFi.persistent( false );
+  WiFi.mode( WIFI_STA );
+  WiFi.config( ip, gateway, subnet );
+  WiFi.begin( ssid, password );
 
   Serial.println("");
   Serial.print("WiFi connected, ");
